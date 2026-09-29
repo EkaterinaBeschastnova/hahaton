@@ -1,0 +1,32 @@
+name: moi-dom-max
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    environment:
+      DATABASE_URL: "${DATABASE_URL:-sqlite+aiosqlite:////data/mydom.db}"
+      MAX_API_URL: "${MAX_API_URL:-https://platform-api2.max.ru}"
+      MAX_BOT_TOKEN: "${MAX_BOT_TOKEN:-}"
+      MINI_APP_URL: "${MINI_APP_URL:-http://localhost:8080}"
+      WEBHOOK_SECRET: "${WEBHOOK_SECRET:-local-demo-webhook-secret}"
+      JWT_SECRET: "${JWT_SECRET:-local-demo-jwt-secret}"
+    volumes:
+      - mydom_data:/data
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=3)"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+volumes:
+  mydom_data:
